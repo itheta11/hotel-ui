@@ -7,7 +7,13 @@ import { ModeToggle } from "./components/theme/ThemeModeToggle";
 import { Route, Routes, HashRouter as Router } from "react-router-dom";
 import Header from "./components/header/Header";
 import Booking from "./components/booking/Booking";
-
+import { API_URL } from "./constants";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import { GetAllRooms } from "./api/rooms";
 function App() {
   return (
     <Router>
