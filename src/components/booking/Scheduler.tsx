@@ -10,35 +10,33 @@ interface RoomProps {
 
 const Scheduler: React.FC<RoomProps> = ({ rooms }) => {
   const totalHeight = rooms.length * 3.5;
-  const [layout, setLayout] = useState([{ i: "0", x: 0, y: 0, w: 2, h: 1 }]);
+  const [layout, setLayout] = useState([
+    { i: "0", x: 0, y: 0, w: 2, h: 1 },
+    { i: "1", x: 5, y: 1, w: 2, h: 1 },
+  ]);
 
   return (
-    <div
-      className={` absolute top-12 left-36 w-[calc(100%-9rem)] h-[${
-        totalHeight + "rem"
-      }] bg-teal-100`}
-    >
-      <div>
-        <GridLayout
-          className="layout p-0 m-0 transform-none bg-teal-700"
-          layout={layout}
-          cols={7}
-          rowHeight={56}
-          width={1320}
-          preventCollision={true}
-          compactType={null}
-        >
-          {layout.map(({ i, x, y, w, h }) => (
-            <div
-              className="!transform-none"
-              key={i}
-              style={{ border: "1px solid black", textAlign: "center" }}
-            >
-              {`Item ${i} x: ${x} y: ${y} w: ${w} h: ${h}`}
-            </div>
-          ))}
-        </GridLayout>
-      </div>
+    <div className={`booking-layout absolute top-12 left-36 bg-teal-400`}>
+      <GridLayout
+        className={`p-0 m-0`}
+        layout={layout}
+        cols={4 * 7}
+        rowHeight={56}
+        width={1308}
+        preventCollision={true}
+        margin={[4, 0]}
+        draggableHandle=".handle"
+        resizeHandles={["n", "e", "s", "w"]}
+      >
+        {layout.map(({ i, x, y, w, h }) => (
+          <div
+            className="handle bg-teal-300 bg-opacity-50 border-1 text-center"
+            key={i}
+          >
+            {`Item ${i}`}
+          </div>
+        ))}
+      </GridLayout>
     </div>
   );
 };

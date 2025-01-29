@@ -17,7 +17,7 @@ export default function Booking() {
   });
   return (
     <section className="w-full h-[calc(100vh-3.5rem)] p-2 overflow-x-hidden">
-      <div className="h-full flex flex-col relative bg-teal-400">
+      <div className="h-full flex flex-col relative">
         <WeekHeader />
         {isSuccess && <RoomLayout rooms={data} />}
         {isSuccess && <Scheduler rooms={data} />}
