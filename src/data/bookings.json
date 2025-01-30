@@ -1,0 +1,140 @@
+[
+  {
+    "id": "1a5eaa10-1ac8-4813-aea8-1e2ab12fc725",
+    "createdAt": "2025-01-30T22:24:13.25812",
+    "modifiedAt": null,
+    "checkIn": "2025-01-27T16:05:29.5",
+    "checkOut": "2025-01-31T16:05:29.5",
+    "totalBill": 2000,
+    "advanceAmount": 0,
+    "user": {
+      "id": "8e158e48-8129-4da2-91c1-da6a5b61404f",
+      "name": "Bharathi",
+      "address": "Thirthahalli",
+      "phoneNumber": 9900429095,
+      "idProof": "adar"
+    },
+    "rooms": [
+      {
+        "id": 201,
+        "createdAt": "2025-01-30T18:22:28.0556837Z",
+        "floor": 2,
+        "roomType": "DOUBLE",
+        "isAc": true,
+        "basePrice": 0
+      }
+    ]
+  },
+  {
+    "id": "275f6a5e-c53d-47e3-a575-d67fb9658e71",
+    "createdAt": "2025-01-30T22:20:18.480926",
+    "modifiedAt": null,
+    "checkIn": "2025-01-27T16:05:29.5",
+    "checkOut": "2025-01-30T16:05:29.5",
+    "totalBill": 2000,
+    "advanceAmount": 0,
+    "user": {
+      "id": "8e158e48-8129-4da2-91c1-da6a5b61404f",
+      "name": "Bharathi",
+      "address": "Thirthahalli",
+      "phoneNumber": 9900429095,
+      "idProof": "adar"
+    },
+    "rooms": [
+      {
+        "id": 104,
+        "createdAt": "2025-01-30T18:22:28.0556873Z",
+        "floor": 1,
+        "roomType": "DOUBLE",
+        "isAc": true,
+        "basePrice": 0
+      },
+      {
+        "id": 105,
+        "createdAt": "2025-01-30T18:22:28.055689Z",
+        "floor": 1,
+        "roomType": "DOUBLE",
+        "isAc": true,
+        "basePrice": 0
+      }
+    ]
+  },
+  {
+    "id": "39fbdabf-aac4-4526-b066-3cafb29d54d8",
+    "createdAt": "2025-01-30T22:23:19.237807",
+    "modifiedAt": null,
+    "checkIn": "2025-01-27T16:05:29.5",
+    "checkOut": "2025-01-30T16:05:29.5",
+    "totalBill": 2000,
+    "advanceAmount": 0,
+    "user": {
+      "id": "8e158e48-8129-4da2-91c1-da6a5b61404f",
+      "name": "Bharathi",
+      "address": "Thirthahalli",
+      "phoneNumber": 9900429095,
+      "idProof": "adar"
+    },
+    "rooms": [
+      {
+        "id": 102,
+        "createdAt": "2025-01-30T18:22:28.0556915Z",
+        "floor": 1,
+        "roomType": "DOUBLE",
+        "isAc": true,
+        "basePrice": 0
+      }
+    ]
+  },
+  {
+    "id": "57c87925-234e-43b1-ade1-373893ddf0fa",
+    "createdAt": "2025-01-30T22:59:38.908977",
+    "modifiedAt": null,
+    "checkIn": "2025-01-28T16:05:29.5",
+    "checkOut": "2025-01-30T16:05:29.5",
+    "totalBill": 1000,
+    "advanceAmount": 0,
+    "user": {
+      "id": "8e158e48-8129-4da2-91c1-da6a5b61404f",
+      "name": "Bharathi",
+      "address": "Thirthahalli",
+      "phoneNumber": 9900429095,
+      "idProof": "adar"
+    },
+    "rooms": [
+      {
+        "id": 204,
+        "createdAt": "2025-01-30T18:22:28.055694Z",
+        "floor": 2,
+        "roomType": "DOUBLE",
+        "isAc": true,
+        "basePrice": 0
+      }
+    ]
+  },
+  {
+    "id": "74979559-16c6-4b6c-8ee5-0086da19ab01",
+    "createdAt": "2025-01-30T22:16:57.43832",
+    "modifiedAt": null,
+    "checkIn": "2025-01-28T16:05:29.5",
+    "checkOut": "2025-01-30T16:05:29.5",
+    "totalBill": 1000,
+    "advanceAmount": 0,
+    "user": {
+      "id": "8e158e48-8129-4da2-91c1-da6a5b61404f",
+      "name": "Bharathi",
+      "address": "Thirthahalli",
+      "phoneNumber": 9900429095,
+      "idProof": "adar"
+    },
+    "rooms": [
+      {
+        "id": 103,
+        "createdAt": "2025-01-30T18:22:28.0556952Z",
+        "floor": 1,
+        "roomType": "DOUBLE",
+        "isAc": true,
+        "basePrice": 0
+      }
+    ]
+  }
+]

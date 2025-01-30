@@ -1,9 +1,13 @@
-import { getCurrentWeek } from "@/helper/date-time";
+import { getCurrentWeek, WeekDetails } from "@/helper/date-time";
 import moment from "moment";
 import { RiArrowLeftSFill, RiArrowRightSFill } from "react-icons/ri";
 
-export function WeekHeader() {
-  const weekDays = getCurrentWeek();
+interface WeekHeaderProps {
+  roomIds: Number[];
+  weekDays: WeekDetails[];
+}
+
+const WeekHeader: React.FC<WeekHeaderProps> = ({ roomIds, weekDays }) => {
   const currentDay = moment().format("Do");
 
   return (
@@ -19,7 +23,9 @@ export function WeekHeader() {
           className={`flex-1 border-2 dark:border-zinc-400 border-r-0 flex flex-col p-1 text-sm 
             ${currentDay === weekDay.Date ? "text-teal-400 relative" : ""}`}
         >
-          {currentDay === weekDay.Date && <CurrentTimePointer />}
+          {currentDay === weekDay.Date && (
+            <CurrentTimePointer roomIds={roomIds} />
+          )}
           <span className="font-bold">
             {weekDay.Date}, {weekDay.Month}
           </span>
@@ -28,16 +34,19 @@ export function WeekHeader() {
       ))}
     </div>
   );
-}
+};
 
-const CurrentTimePointer = () => {
+const CurrentTimePointer: React.FC<{ roomIds: Number[] }> = ({ roomIds }) => {
   const currentTimestamp = `${moment().format("HH:mm ")}`;
   const currentHr = moment().hours();
 
   return (
     <div
-      className="absolute z-50 top-12 -left-1 w-0.5 h-screen bg-red-500"
-      style={{ marginLeft: currentHr * 0.5125 + "rem" }}
+      className="absolute z-50 top-12 -left-1 w-0.5 bg-red-500"
+      style={{
+        height: roomIds.length * 3.5 + "rem",
+        marginLeft: currentHr * 0.5125 + "rem",
+      }}
     >
       <div className="relative">
         <div className="absolute p-1 bg-red-500 text-white">
@@ -47,3 +56,5 @@ const CurrentTimePointer = () => {
     </div>
   );
 };
+
+export default WeekHeader;

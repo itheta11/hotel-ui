@@ -1,9 +1,12 @@
-import moment from "moment";
-interface WeekDetails {
+import moment, { Moment } from "moment";
+export interface WeekDetails {
   Date: string;
   Day: string;
   Month: string;
 }
+
+const isoFormat = "YYYY-MM-DDTHH:mm:ss.SSS";
+
 export function getCurrentWeek() {
   let weekDays: WeekDetails[] = [];
   const currentDate = moment();
@@ -18,3 +21,25 @@ export function getCurrentWeek() {
   }
   return weekDays;
 }
+
+export function getIsoDateWithoutZone() {
+  return moment().format(isoFormat);
+}
+
+export function getWeekStartandEndDate() {
+  const weekStart = moment().clone().startOf("isoWeek");
+  const weekEnd = moment(weekStart).add(6, "days");
+
+  return [weekStart.format(isoFormat), weekEnd.format(isoFormat)];
+}
+
+export const getDateY = (
+  weekDays: Number[],
+  momentDate: Moment,
+  dayInterval: number,
+  dayParts: number
+) => {
+  const startDay = weekDays.indexOf(momentDate.date()) * dayParts;
+  const getY = startDay + Math.ceil((momentDate.hours() + 1) / dayInterval);
+  return getY;
+};

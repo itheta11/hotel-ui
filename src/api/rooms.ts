@@ -1,5 +1,4 @@
 import { Rooms } from "@/constants/api-endpoints";
-
 export interface Room {
   id: number;
   createdAt: string;
