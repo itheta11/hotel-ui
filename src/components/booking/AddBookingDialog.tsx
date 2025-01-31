@@ -17,6 +17,7 @@ import React, { useMemo } from "react";
 import UserForm from "./create-booking/UserForm";
 import { Users } from "@/api/users";
 import { useNavigate } from "react-router";
+import RoomBookForm from "./create-booking/RoomBookForm";
 
 interface AddBookingProps {
   id?: string;
@@ -65,9 +66,14 @@ const AddBookingDialog: React.FC<AddBookingProps> = ({
         </DialogHeader>
         <div className="max-h-[30rem] overflow-y-auto">
           <UserForm users={users} />
+          <RoomBookForm rooms={rooms} bookings={bookings} />
         </div>
         <DialogFooter>
-          <Button type="submit">Save changes</Button>
+          <div className="w-full flex justify-end">
+            <Button className="" type="submit">
+              Save changes
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

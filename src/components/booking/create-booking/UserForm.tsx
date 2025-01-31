@@ -157,7 +157,7 @@ const UserForm: React.FC<UserFormProps> = ({ users }) => {
   }
 
   return (
-    <Card className="user__card">
+    <Card className="user__card m-2">
       <CardHeader>
         <CardTitle>User details</CardTitle>
       </CardHeader>

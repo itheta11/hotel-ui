@@ -19,7 +19,7 @@ function App() {
     <Router>
       <main
         className="w-screen h-screen light bg-slate-100 dark:bg-zinc-900 text-zinc-900 dark:text-slate-100
-    font-sans"
+    font-sans "
       >
         <Header />
         <Routes>

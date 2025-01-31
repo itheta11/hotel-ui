@@ -55,6 +55,8 @@
     --chart-5: 27 87% 67%;
 
     --radius: 0.5rem;
+
+    --scroll-color: 216 12% 84%;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -104,6 +106,8 @@
     --chart-4: 280 65% 60%;
 
     --chart-5: 340 75% 55%;
+
+    --scroll-color: 215 14% 34%;
   }
 }
 
@@ -114,4 +118,17 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--scroll-color));
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
