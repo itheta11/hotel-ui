@@ -1,4 +1,4 @@
-import { getAllBookings, getAllBookingsTest } from "@/api/bookings";
+import { Bookings, getAllBookings, getAllBookingsTest } from "@/api/bookings";
 import { Room } from "@/api/rooms";
 import {
   getDateY,
@@ -15,25 +15,19 @@ import "react-resizable/css/styles.css";
 interface RoomProps {
   roomIds: Number[];
   weekDays: Number[];
+  bookings: Bookings;
 }
 
 const DAY_PARTS = 4;
 const dayInterval = 24 / DAY_PARTS;
 
-const Scheduler: React.FC<RoomProps> = ({ roomIds, weekDays }) => {
+const Scheduler: React.FC<RoomProps> = ({ roomIds, weekDays, bookings }) => {
   const [fromDate, toDate] = getWeekStartandEndDate();
   const [layout, setLayout] = useState<GridLayout.Layout[]>([]);
-  const { data, isSuccess } = useQuery({
-    queryKey: ["booking", fromDate, toDate],
-    queryFn: () => getAllBookings(fromDate, toDate),
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    gcTime: Infinity,
-  });
 
   useEffect(() => {
-    if (data) {
-      const newLayout = data.map((booking) => {
+    if (bookings) {
+      const newLayout = bookings.map((booking) => {
         const roomIndexs = booking.rooms.map((room) => {
           return roomIds.indexOf(room.id);
         });
@@ -63,9 +57,9 @@ const Scheduler: React.FC<RoomProps> = ({ roomIds, weekDays }) => {
       });
       setLayout([...newLayout]);
       console.log({ newLayout });
-      console.log({ data });
+      console.log({ data: bookings });
     }
-  }, [data]);
+  }, [bookings]);
 
   const totalHeight = roomIds.length * 3.5;
 
