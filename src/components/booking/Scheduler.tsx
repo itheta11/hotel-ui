@@ -64,14 +64,16 @@ const Scheduler: React.FC<RoomProps> = ({ roomIds, weekDays, bookings }) => {
   const totalHeight = roomIds.length * 3.5;
 
   return (
-    <div className={`booking-layout absolute top-12 left-36 bg-teal-400`}>
+    <div
+      className={`booking-layout absolute top-12 left-[calc(9rem)] bg-teal-400`}
+    >
       <GridLayout
         className={`p-0 m-0`}
         layout={layout}
         cols={DAY_PARTS * 7}
         rowHeight={56}
         width={1308}
-        margin={[4, 0]}
+        margin={[0, 0]}
         onLayoutChange={(newLayout) => setLayout(newLayout)}
         preventCollision={true}
         compactType={null}
@@ -80,10 +82,10 @@ const Scheduler: React.FC<RoomProps> = ({ roomIds, weekDays, bookings }) => {
       >
         {layout.map(({ i, x, y, w, h }) => (
           <div
-            className="handle bg-teal-300 bg-opacity-50 border-1 text-center"
+            className="handle bg-teal-300 bg-opacity-50 border-2 border-teal-500 dark:border-teal-100  text-center"
             key={i}
           >
-            <div className="text-sm">{`Item ${i}`}</div>
+            <div className="text-sm">{`Item -${x}-${y}-${w}-${h}`}</div>
           </div>
         ))}
       </GridLayout>

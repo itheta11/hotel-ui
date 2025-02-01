@@ -1,13 +1,11 @@
-import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DateRange, DayPicker } from "react-day-picker";
-import { endOfWeek, startOfWeek } from "date-fns";
+import * as React from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { DayPicker } from "react-day-picker"
 
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
-import { useState } from "react";
+import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 function Calendar({
   className,
@@ -15,8 +13,6 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  const [selectedWeek, setSelectedWeek] = useState<DateRange | undefined>();
-
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -69,34 +65,10 @@ function Calendar({
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
       }}
-      // modifiers={{
-      //   selected: selectedWeek,
-      //   range_start: selectedWeek?.from,
-      //   range_end: selectedWeek?.to,
-      //   range_middle: (date: Date) =>
-      //     selectedWeek
-      //       ? isDateInRange(date, selectedWeek, { excludeEnds: true })
-      //       : false,
-      // }}
-      onDayClick={(day, modifiers) => {
-        if (modifiers.selected) {
-          setSelectedWeek(undefined); // clear the selection if the day is already selected
-          return;
-        }
-        setSelectedWeek({
-          from: startOfWeek(day),
-          to: endOfWeek(day),
-        });
-      }}
-      footer={
-        selectedWeek &&
-        `Week from ${selectedWeek?.from?.toLocaleDateString()} to
-            ${selectedWeek?.to?.toLocaleDateString()}`
-      }
       {...props}
     />
-  );
+  )
 }
-Calendar.displayName = "Calendar";
+Calendar.displayName = "Calendar"
 
-export { Calendar };
+export { Calendar }
