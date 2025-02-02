@@ -10,19 +10,33 @@ import { useQuery } from "@tanstack/react-query";
 import { GetAllRooms, Room } from "@/api/rooms";
 import Scheduler from "./Scheduler";
 import WeekHeader from "./WeekHeader";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { CopyPlus } from "lucide-react";
-import { Bookings, getAllBookings } from "@/api/bookings";
+import {
+  Booking as BookingType,
+  Bookings,
+  getAllBookings,
+} from "@/api/bookings";
 import { getAllUsers } from "@/api/users";
 import AddBookingDialog from "./AddBookingDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const weekDays = getCurrentWeek();
 export default function Booking() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Bookings>([]);
   const [fromDate, toDate] = getWeekStartandEndDate();
-
+  const [open, setOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<BookingType>();
   const {
     data: roomsAndBooking,
     isSuccess: isRoomsAndBookingSuccess,
@@ -62,6 +76,11 @@ export default function Booking() {
     return isRoomsAndBookingSuccess && isUserSuccess;
   }, [isRoomsAndBookingSuccess, isUserSuccess]);
 
+  function handleSelectedBooking(booking: BookingType) {
+    setSelectedBooking({ ...booking });
+    setOpen(true);
+  }
+
   function handleBookingDialogClose() {
     refetchBookingRooms();
     refetchUsers();
@@ -73,12 +92,29 @@ export default function Booking() {
           <div className=" w-full menubar p-1 flex justify-end">
             <div className="">
               {bookings.length > 0 && usersData && (
-                <AddBookingDialog
-                  rooms={rooms}
-                  bookings={bookings}
-                  users={usersData}
-                  onBookingDialogClose={handleBookingDialogClose}
-                />
+                <>
+                  <Button
+                    className=""
+                    onClick={() => setOpen(true)}
+                    aria-expanded={open}
+                    aria-haspopup="dialog"
+                    aria-controls="dialog-id"
+                    data-state={open ? "open" : "closed"}
+                  >
+                    <CopyPlus />
+                    Add booking
+                  </Button>
+                  <AddBookingDialog
+                    open={open}
+                    id={selectedBooking ? selectedBooking.id : ""}
+                    selectedBooking={selectedBooking ?? undefined}
+                    setOpen={setOpen}
+                    rooms={rooms}
+                    bookings={bookings}
+                    users={usersData}
+                    onBookingDialogClose={handleBookingDialogClose}
+                  />
+                </>
               )}
             </div>
           </div>
@@ -88,11 +124,12 @@ export default function Booking() {
               roomIds={rooms.map((data) => data.id)}
             />
             <RoomLayout rooms={rooms} />
-            {bookings.length > 0 && (
+            {bookings.length > 0 && usersData && (
               <Scheduler
-                roomIds={rooms.map((data) => data.id)}
+                rooms={rooms}
                 weekDays={weekDays.map((d) => parseInt(d.Date))}
                 bookings={bookings}
+                selectedBooking={handleSelectedBooking}
               />
             )}
           </div>

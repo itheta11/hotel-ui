@@ -1,5 +1,11 @@
-import { Bookings, getAllBookings, getAllBookingsTest } from "@/api/bookings";
+import {
+  Booking,
+  Bookings,
+  getAllBookings,
+  getAllBookingsTest,
+} from "@/api/bookings";
 import { Room } from "@/api/rooms";
+import { Users } from "@/api/users";
 import {
   getDateY,
   getWeekStartandEndDate,
@@ -7,23 +13,35 @@ import {
 } from "@/helper/date-time";
 import { useQuery } from "@tanstack/react-query";
 import moment, { Moment } from "moment";
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useMemo, useState } from "react";
 import GridLayout from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-
+import AddBookingDialog from "./AddBookingDialog";
+import { GripVertical, Pencil } from "lucide-react";
 interface RoomProps {
-  roomIds: Number[];
+  rooms: Room[];
   weekDays: Number[];
   bookings: Bookings;
+  selectedBooking: (booking: Booking) => void;
 }
 
 const DAY_PARTS = 4;
 const dayInterval = 24 / DAY_PARTS;
 
-const Scheduler: React.FC<RoomProps> = ({ roomIds, weekDays, bookings }) => {
+const Scheduler: React.FC<RoomProps> = ({
+  rooms,
+  weekDays,
+  bookings,
+  selectedBooking,
+}) => {
   const [fromDate, toDate] = getWeekStartandEndDate();
   const [layout, setLayout] = useState<GridLayout.Layout[]>([]);
+  const [selectedId, setSelectedId] = useState("");
+
+  const roomIds = useMemo(() => {
+    return rooms.map((data) => data.id);
+  }, [rooms]);
 
   useEffect(() => {
     if (bookings) {
@@ -63,9 +81,17 @@ const Scheduler: React.FC<RoomProps> = ({ roomIds, weekDays, bookings }) => {
 
   const totalHeight = roomIds.length * 3.5;
 
+  function handleBookingEdit(i: string): void {
+    setSelectedId(i);
+    const booking = bookings.find((b) => b.id === i);
+    if (booking) {
+      selectedBooking(booking);
+    }
+  }
+
   return (
     <div
-      className={`booking-layout absolute top-12 left-[calc(9rem)] bg-teal-400`}
+      className={`booking-layout absolute top-12 left-[calc(9rem)] bg-teal-800`}
     >
       <GridLayout
         className={`p-0 m-0`}
@@ -78,14 +104,21 @@ const Scheduler: React.FC<RoomProps> = ({ roomIds, weekDays, bookings }) => {
         preventCollision={true}
         compactType={null}
         draggableHandle=".handle"
+        draggableCancel=".cancel"
         resizeHandles={["n", "e", "s", "w"]}
       >
         {layout.map(({ i, x, y, w, h }) => (
           <div
-            className="handle bg-teal-300 bg-opacity-50 border-2 border-teal-500 dark:border-teal-100  text-center"
+            className="bg-teal-300 bg-opacity-50 border-2 border-teal-500 dark:border-teal-100"
             key={i}
           >
-            <div className="text-sm">{`Item -${x}-${y}-${w}-${h}`}</div>
+            <div className="text-sm">
+              <GripVertical className="handle" />
+              {`Item -${x}-${y}-${w}-${h} ${selectedId}`}
+              <button className="cancel" onClick={() => handleBookingEdit(i)}>
+                <Pencil />
+              </button>
+            </div>
           </div>
         ))}
       </GridLayout>

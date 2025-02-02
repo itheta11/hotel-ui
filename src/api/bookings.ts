@@ -31,6 +31,14 @@ export interface Room {
   basePrice: number;
 }
 
+export interface CreateBooking {
+  userId: string;
+  checkIn: string;
+  checkOut: string;
+  totalBill: number;
+  advanceAmount: number;
+  roomIds: number[];
+}
 export function getAllBookings(
   fromDate?: string,
   toDate?: string
@@ -50,4 +58,29 @@ export function getAllBookingsTest(
   return new Promise((res, rej) => {
     setTimeout(() => res(booking), 3000);
   });
+}
+
+export function createBooking(booking: CreateBooking): Promise<Booking> {
+  return fetch(Booking.CreateBooking, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(booking),
+  }).then((r) => r.json());
+}
+
+export function updateBooking(
+  id: string,
+  booking: CreateBooking
+): Promise<any> {
+  return fetch(Booking.UpdatBooking(id), {
+    method: "PUT",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(booking),
+  }).then((r) => r);
 }

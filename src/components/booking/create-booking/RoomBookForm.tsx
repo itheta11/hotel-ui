@@ -1,4 +1,10 @@
-import { Bookings } from "@/api/bookings";
+import {
+  Booking,
+  Bookings,
+  createBooking,
+  CreateBooking,
+  updateBooking,
+} from "@/api/bookings";
 import { Room } from "@/api/rooms";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -28,11 +34,7 @@ import { z } from "zod";
 import { setHours, setMinutes } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { MultiSelect, MultiSelectProps } from "@/components/ui/multi-select";
-
-interface RoomBookProps {
-  rooms: Room[];
-  bookings: Bookings;
-}
+import { useToast } from "@/hooks/use-toast";
 
 const MODE = {
   VIEW: "VIEW",
@@ -40,8 +42,18 @@ const MODE = {
   EDIT: "EDIT",
 };
 
-const createRoomFormSchema = ({ rooms, bookings }: RoomBookProps) => {
+const createRoomFormSchema = ({
+  rooms,
+  bookings,
+}: {
+  rooms: Room[];
+  bookings: Bookings;
+}) => {
   return z.object({
+    rooms: z
+      .number()
+      .array()
+      .refine((val) => val.length > 0, { message: "Must select a room" }),
     checkIn: z.date({
       required_error: "Check In date is required.",
     }),
@@ -59,34 +71,55 @@ const createRoomFormSchema = ({ rooms, bookings }: RoomBookProps) => {
 
 type FormValues = z.infer<ReturnType<typeof createRoomFormSchema>>;
 
-const frameworksList = [
-  { value: "react", label: "React" },
-  { value: "angular", label: "Angular" },
-  { value: "vue", label: "Vue" },
-  { value: "svelte", label: "Svelte" },
-  { value: "ember", label: "Ember" },
-];
+interface RoomBookProps {
+  mode: string;
+  bookingId?: string;
+  selectedBooking?: Booking;
+  rooms: Room[];
+  bookings: Bookings;
+  getUserId: () => string | undefined;
+  onClose: () => void;
+}
 
-const RoomBookForm: React.FC<RoomBookProps> = ({ rooms, bookings }) => {
+const RoomBookForm: React.FC<RoomBookProps> = ({
+  mode,
+  bookingId,
+  selectedBooking,
+  rooms,
+  bookings,
+  getUserId,
+  onClose,
+}) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(createRoomFormSchema({ rooms, bookings })),
-    defaultValues: {
-      totalBill: 0,
-      paid: 0,
-    },
+    defaultValues: selectedBooking
+      ? {
+          rooms: selectedBooking.rooms.map((r) => Number(r.id)) ?? [],
+          checkIn: new Date(selectedBooking.checkIn) ?? new Date(),
+          checkOut: new Date(selectedBooking.checkOut) ?? new Date(),
+          totalBill: selectedBooking.totalBill ?? 0,
+          paid: selectedBooking.advanceAmount ?? 0,
+        }
+      : {
+          totalBill: 0,
+          paid: 0,
+          rooms: [],
+          checkIn: new Date(),
+          checkOut: new Date(),
+        },
   });
   const {
     register,
     handleSubmit,
     getValues,
-    formState: { errors },
+    formState: { errors, isDirty },
     trigger,
     setValue,
     setError,
     clearErrors,
   } = form;
 
-  const [selectedRooms, setSelectedRooms] = useState<string[]>();
+  const { toast } = useToast();
 
   const roomNos = useMemo(() => {
     return rooms.map((x) => {
@@ -97,13 +130,11 @@ const RoomBookForm: React.FC<RoomBookProps> = ({ rooms, bookings }) => {
     });
   }, [rooms]);
 
-  function onSubmit(values: FormValues) {
-    console.log(values);
-  }
   function handleCheckInDate(
     val: Date | undefined,
     field: ControllerRenderProps<
       {
+        rooms: number[];
         checkIn: Date;
         checkOut: Date;
         totalBill: number;
@@ -131,6 +162,7 @@ const RoomBookForm: React.FC<RoomBookProps> = ({ rooms, bookings }) => {
     val: Date | undefined,
     field: ControllerRenderProps<
       {
+        rooms: number[];
         checkIn: Date;
         checkOut: Date;
         totalBill: number;
@@ -153,7 +185,47 @@ const RoomBookForm: React.FC<RoomBookProps> = ({ rooms, bookings }) => {
     }
     field.onChange(val);
   }
+  function onSubmit(values: FormValues) {
+    debugger;
+    const userId = getUserId();
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "Select a user",
+        duration: 1000,
+      });
+      return;
+    }
 
+    const payload: CreateBooking = {
+      checkIn: formatISO(values.checkIn).split("+")[0],
+      checkOut: formatISO(values.checkOut).split("+")[0],
+      totalBill: values.totalBill,
+      advanceAmount: values.paid,
+      roomIds: values.rooms,
+      userId,
+    };
+    if (mode === MODE.CREATE) {
+      createBooking(payload).then((r) => {
+        console.log("booking created successfully");
+        toast({
+          variant: "default",
+          title: "Booking successfully created",
+          duration: 1000,
+        });
+      });
+    } else if (mode === MODE.EDIT && bookingId) {
+      updateBooking(bookingId, payload).then((r) => {
+        console.log("booking updated successfully");
+        toast({
+          variant: "default",
+          title: "Booking updated created",
+          duration: 1000,
+        });
+      });
+    }
+    onClose();
+  }
   return (
     <Card className="m-2">
       <CardHeader>
@@ -165,16 +237,34 @@ const RoomBookForm: React.FC<RoomBookProps> = ({ rooms, bookings }) => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-8"
               >
+                <p>dirty - {JSON.stringify(isDirty)}</p>
                 <div className="grid grid-cols-4 gap-4">
-                  <MultiSelect
-                    className="col-span-2"
-                    options={roomNos}
-                    onValueChange={setSelectedRooms}
-                    defaultValue={selectedRooms}
-                    placeholder="Select frameworks"
-                    variant="inverted"
-                    animation={2}
-                    maxCount={3}
+                  <FormField
+                    control={form.control}
+                    name="rooms"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Select a room</FormLabel>
+                        <FormControl>
+                          <MultiSelect
+                            className="col-span-2"
+                            options={roomNos}
+                            defaultValue={field.value?.map((x) => x.toString())}
+                            onValueChange={(val) => {
+                              debugger;
+                              field.onChange(
+                                val ? val.map((v) => Number(v)) : []
+                              );
+                            }}
+                            placeholder="Select a room"
+                            variant="inverted"
+                            animation={2}
+                            maxCount={3}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
 
                   <FormField
@@ -213,7 +303,6 @@ const RoomBookForm: React.FC<RoomBookProps> = ({ rooms, bookings }) => {
                                 date > new Date() ||
                                 date < new Date("1900-01-01")
                               }
-                              initialFocus
                             />
                           </PopoverContent>
                         </Popover>
@@ -258,7 +347,6 @@ const RoomBookForm: React.FC<RoomBookProps> = ({ rooms, bookings }) => {
                                 date > new Date() ||
                                 date < new Date("1900-01-01")
                               }
-                              initialFocus
                             />
                           </PopoverContent>
                         </Popover>

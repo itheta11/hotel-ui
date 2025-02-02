@@ -32,7 +32,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
 const MODE = {
   VIEW: "VIEW",
@@ -68,197 +68,220 @@ function createFormSchema(users: User[]) {
 
 type FormValues = z.infer<ReturnType<typeof createFormSchema>>;
 
-interface UserFormProps {
+type UserFormProps = {
+  selectedUser?: User;
   users: User[];
-}
-
-const UserForm: React.FC<UserFormProps> = ({ users }) => {
-  const [mode, setMode] = useState(MODE.CREATE);
-  const [selectedUserId, setSelectedUserId] = useState("");
-  const form = useForm<FormValues>({
-    resolver: zodResolver(createFormSchema(users)),
-    defaultValues: {
-      name: "",
-      address: "",
-      phoneNumber: "",
-      idProof: "",
-    },
-  });
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    formState: { errors },
-    trigger,
-    setValue,
-  } = form;
-
-  useEffect(() => {
-    form.reset(undefined, { keepValues: true });
-  }, [users]);
-
-  function handleNewUser() {
-    setSelectedUserId("");
-    setMode(MODE.CREATE);
-    setValue("name", "");
-    setValue("phoneNumber", "");
-    setValue("idProof", "");
-    setValue("address", "");
-  }
-
-  const handleUserSelect = (val: string) => {
-    const user = users.find((u) => u.id === val);
-    if (user) {
-      setSelectedUserId(val);
-      setMode(MODE.EDIT);
-      setValue("name", user.name);
-      setValue("phoneNumber", user.phoneNumber.toString());
-      setValue("idProof", user.idProof);
-      setValue("address", user.address);
-    }
-  };
-
-  const handlenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setValue("name", value, { shouldValidate: true });
-    trigger("name");
-  };
-
-  function onSubmit(values: FormValues) {
-    debugger;
-    if (mode === MODE.CREATE) {
-      const payload: CreateUser = {
-        name: values.name,
-        idProof: values.idProof,
-        address: values.address,
-        phoneNumber: parseInt(values.phoneNumber),
-      };
-      addUser(payload).then((r) => {
-        console.log("successfully saved");
-        setSelectedUserId(r.id);
-        setMode(MODE.EDIT);
-      });
-    }
-
-    if (mode === MODE.EDIT) {
-      const updatePayload: User = {
-        id: selectedUserId,
-        name: values.name,
-        idProof: values.idProof,
-        address: values.address,
-        phoneNumber: parseInt(values.phoneNumber),
-      };
-      updateUser(updatePayload).then((r) => {
-        console.log("update successfully");
-        setSelectedUserId(r.id);
-        setMode(MODE.EDIT);
-      });
-    }
-  }
-
-  return (
-    <Card className="user__card m-2">
-      <CardHeader>
-        <CardTitle>User details</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-4">
-          <Select onValueChange={handleUserSelect}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select a user" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {users?.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Button size={"sm"} onClick={handleNewUser}>
-            New User
-          </Button>
-        </div>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
-            <div className="grid grid-cols-4 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        onChange={handlenameChange}
-                        disabled={mode === MODE.EDIT}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="phoneNumber"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="tel"
-                        maxLength={10}
-                        pattern="[0-9]{10}"
-                        inputMode="numeric"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="idProof"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Id Proof</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem className="col-span-4">
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <Button type="submit" size={"sm"}>
-              {mode === MODE.CREATE ? "Create User" : "Edit User"}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
-  );
 };
+
+export type UserFormRef = {
+  getUserId: () => string | undefined;
+};
+
+const UserForm = forwardRef<UserFormRef, UserFormProps>(
+  ({ selectedUser, users }, ref) => {
+    const [mode, setMode] = useState(selectedUser ? MODE.EDIT : MODE.CREATE);
+    const [selectedUserId, setSelectedUserId] = useState(
+      selectedUser ? selectedUser.id : ""
+    );
+    const form = useForm<FormValues>({
+      resolver: zodResolver(createFormSchema(users)),
+      defaultValues: selectedUser
+        ? {
+            name: selectedUser.name ?? "",
+            address: selectedUser.address ?? "",
+            phoneNumber: selectedUser.phoneNumber.toString() ?? "",
+            idProof: selectedUser.idProof ?? "",
+          }
+        : {
+            name: "",
+            address: "",
+            phoneNumber: "",
+            idProof: "",
+          },
+    });
+    const {
+      register,
+      handleSubmit,
+      getValues,
+      formState: { errors, isDirty },
+      trigger,
+      setValue,
+    } = form;
+
+    useImperativeHandle(ref, () => ({
+      getUserId() {
+        return selectedUserId;
+      },
+    }));
+
+    useEffect(() => {
+      form.reset(undefined, { keepValues: true });
+    }, [users]);
+
+    function handleNewUser() {
+      setSelectedUserId("");
+      setMode(MODE.CREATE);
+      setValue("name", "");
+      setValue("phoneNumber", "");
+      setValue("idProof", "");
+      setValue("address", "");
+    }
+
+    const handleUserSelect = (val: string) => {
+      const user = users.find((u) => u.id === val);
+      if (user) {
+        setSelectedUserId(val);
+        setMode(MODE.EDIT);
+        setValue("name", user.name);
+        setValue("phoneNumber", user.phoneNumber.toString());
+        setValue("idProof", user.idProof);
+        setValue("address", user.address);
+      }
+    };
+
+    const handlenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setValue("name", value, { shouldValidate: true });
+      trigger("name");
+    };
+
+    function onSubmit(values: FormValues) {
+      debugger;
+      if (mode === MODE.CREATE) {
+        const payload: CreateUser = {
+          name: values.name,
+          idProof: values.idProof,
+          address: values.address,
+          phoneNumber: parseInt(values.phoneNumber),
+        };
+        addUser(payload).then((r) => {
+          console.log("successfully saved");
+          setSelectedUserId(r.id);
+          setMode(MODE.EDIT);
+        });
+      }
+
+      if (mode === MODE.EDIT) {
+        const updatePayload: User = {
+          id: selectedUserId,
+          name: values.name,
+          idProof: values.idProof,
+          address: values.address,
+          phoneNumber: parseInt(values.phoneNumber),
+        };
+        updateUser(updatePayload).then((r) => {
+          console.log("update successfully");
+          setSelectedUserId(r.id);
+          setMode(MODE.EDIT);
+        });
+      }
+    }
+
+    return (
+      <Card className="user__card m-2">
+        <CardHeader>
+          <CardTitle>User details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <p>dirty - {JSON.stringify(isDirty)}</p>
+            <Select onValueChange={handleUserSelect}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a user" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {users?.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Button size={"sm"} onClick={handleNewUser}>
+              New User
+            </Button>
+          </div>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 ">
+              <div className="grid grid-cols-4 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          onChange={handlenameChange}
+                          disabled={mode === MODE.EDIT}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="tel"
+                          maxLength={10}
+                          pattern="[0-9]{10}"
+                          inputMode="numeric"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="idProof"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Id Proof</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem className="col-span-4">
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <Button type="submit" size={"sm"}>
+                {mode === MODE.CREATE ? "Create User" : "Edit User"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    );
+  }
+);
 
 export default UserForm;

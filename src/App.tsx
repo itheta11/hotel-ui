@@ -14,6 +14,8 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { GetAllRooms } from "./api/rooms";
+import { Toaster } from "@/components/ui/toaster";
+
 function App() {
   return (
     <Router>
@@ -26,6 +28,7 @@ function App() {
           <Route path="/" element={<Booking />} />
         </Routes>
       </main>
+      <Toaster />
     </Router>
   );
 }

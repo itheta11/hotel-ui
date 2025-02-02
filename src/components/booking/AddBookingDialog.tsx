@@ -1,4 +1,4 @@
-import { Bookings } from "@/api/bookings";
+import { Booking, Bookings } from "@/api/bookings";
 import { Room } from "@/api/rooms";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,18 +13,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CopyPlus } from "lucide-react";
-import React, { useMemo } from "react";
-import UserForm from "./create-booking/UserForm";
+import React, { useMemo, useRef, useState } from "react";
+import UserForm, { UserFormRef } from "./create-booking/UserForm";
 import { Users } from "@/api/users";
 import { useNavigate } from "react-router";
 import RoomBookForm from "./create-booking/RoomBookForm";
 
 interface AddBookingProps {
   id?: string;
+  selectedBooking?: Booking;
   rooms: Room[];
   bookings: Bookings;
   users: Users;
   onBookingDialogClose: () => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
 const MODE = {
@@ -35,27 +38,26 @@ const MODE = {
 
 const AddBookingDialog: React.FC<AddBookingProps> = ({
   id,
+  selectedBooking,
   rooms,
   bookings,
   users,
+  open,
+  setOpen,
   onBookingDialogClose,
 }) => {
   const mode = id ? MODE.EDIT : MODE.CREATE;
   const navigate = useNavigate();
+  const userRef = useRef<UserFormRef>(null);
 
   function handleClose(open: boolean) {
     if (!open) {
       onBookingDialogClose();
     }
+    setOpen(open);
   }
   return (
-    <Dialog onOpenChange={handleClose}>
-      <DialogTrigger asChild>
-        <Button className="">
-          <CopyPlus />
-          Add booking
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="content max-w-3xl ">
         <DialogHeader>
           <DialogTitle>Booking </DialogTitle>
@@ -65,16 +67,21 @@ const AddBookingDialog: React.FC<AddBookingProps> = ({
           </DialogDescription>
         </DialogHeader>
         <div className="max-h-[30rem] overflow-y-auto">
-          <UserForm users={users} />
-          <RoomBookForm rooms={rooms} bookings={bookings} />
+          <UserForm
+            users={users}
+            ref={userRef}
+            selectedUser={selectedBooking ? selectedBooking.user : undefined}
+          />
+          <RoomBookForm
+            mode={mode}
+            bookingId={id}
+            selectedBooking={selectedBooking}
+            rooms={rooms}
+            bookings={bookings}
+            getUserId={() => userRef.current?.getUserId()}
+            onClose={() => handleClose(false)}
+          />
         </div>
-        <DialogFooter>
-          <div className="w-full flex justify-end">
-            <Button className="" type="submit">
-              Save changes
-            </Button>
-          </div>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

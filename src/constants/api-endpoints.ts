@@ -8,6 +8,8 @@ export const Rooms = {
 export const BookingController = API_URL + "/Booking";
 export const Booking = {
   GetAll: `${BookingController}`,
+  CreateBooking: `${BookingController}`,
+  UpdatBooking: (id: string) => `${BookingController}/${id}`,
 };
 
 export const UsersController = API_URL + "/Users";
