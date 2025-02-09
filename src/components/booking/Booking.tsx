@@ -29,6 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import Spinner from "../ui/spinner";
 
 const weekDays = getCurrentWeek();
 export default function Booking() {
@@ -41,6 +42,7 @@ export default function Booking() {
     data: roomsAndBooking,
     isSuccess: isRoomsAndBookingSuccess,
     refetch: refetchBookingRooms,
+    isFetching: isBookingFetching,
   } = useQuery({
     queryKey: ["bookingRooms"],
     queryFn: () =>
@@ -82,11 +84,13 @@ export default function Booking() {
   }
 
   function handleBookingDialogClose() {
+    debugger;
     refetchBookingRooms();
     refetchUsers();
   }
   return (
     <section className="w-full h-[calc(100vh-3.5rem)] p-2 overflow-x-hidden">
+      <Spinner isShow={isBookingFetching} />
       {rooms.length > 0 && (
         <>
           <div className=" w-full menubar p-1 flex justify-end">

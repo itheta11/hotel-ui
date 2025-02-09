@@ -33,13 +33,13 @@ export function getWeekStartandEndDate() {
   return [weekStart.format(isoFormat), weekEnd.format(isoFormat)];
 }
 
-export const getDateY = (
+export const getDateX = (
   weekDays: Number[],
   momentDate: Moment,
   dayInterval: number,
   dayParts: number
 ) => {
   const startDay = weekDays.indexOf(momentDate.date()) * dayParts;
-  const getY = startDay + Math.ceil((momentDate.hours() + 1) / dayInterval);
+  const getY = startDay + Math.floor(momentDate.hours() / dayInterval);
   return getY;
 };

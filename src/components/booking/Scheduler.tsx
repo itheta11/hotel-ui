@@ -7,7 +7,7 @@ import {
 import { Room } from "@/api/rooms";
 import { Users } from "@/api/users";
 import {
-  getDateY,
+  getDateX,
   getWeekStartandEndDate,
   WeekDetails,
 } from "@/helper/date-time";
@@ -19,12 +19,30 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import AddBookingDialog from "./AddBookingDialog";
 import { GripVertical, Pencil } from "lucide-react";
+import { getUpdatedContainers } from "./layout-helper";
 interface RoomProps {
   rooms: Room[];
   weekDays: Number[];
   bookings: Bookings;
   selectedBooking: (booking: Booking) => void;
 }
+
+type Layout = {
+  i: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+type ItemCallback = (
+  layout: Layout[],
+  oldItem: Layout,
+  newItem: Layout,
+  placeholder: Layout,
+  e: MouseEvent,
+  element: HTMLElement
+) => void;
 
 const DAY_PARTS = 4;
 const dayInterval = 24 / DAY_PARTS;
@@ -57,25 +75,25 @@ const Scheduler: React.FC<RoomProps> = ({
         const checkInMoment = moment(booking.checkIn);
         const checkOutMoment = moment(booking.checkOut);
 
-        const startY = getDateY(
+        const startY = getDateX(
           weekDays,
           checkInMoment,
           dayInterval,
           DAY_PARTS
         );
-        const endY = getDateY(weekDays, checkOutMoment, dayInterval, DAY_PARTS);
-        ///console.log({ checkInMoment, startY, checkOutMoment, endY });
+        const endY = getDateX(weekDays, checkOutMoment, dayInterval, DAY_PARTS);
+        // console.log({ checkInMoment, startY, checkOutMoment, endY });
         return {
           i: booking.id,
           x: startY,
-          w: endY - startY + 1,
+          w: endY - startY,
           y: firstIndex,
           h: height,
         };
       });
       setLayout([...newLayout]);
-      console.log({ newLayout });
-      console.log({ data: bookings });
+      // console.log({ newLayout });
+      // console.log({ data: bookings });
     }
   }, [bookings]);
 
@@ -89,6 +107,12 @@ const Scheduler: React.FC<RoomProps> = ({
     }
   }
 
+  function handleLayoutChange(newLayout: GridLayout.Layout[]): void {
+    const getUpdates = getUpdatedContainers(layout, newLayout);
+    console.log({ getUpdates });
+    setLayout(newLayout);
+  }
+
   return (
     <div
       className={`booking-layout absolute top-12 left-[calc(9rem)] bg-teal-800`}
@@ -100,7 +124,7 @@ const Scheduler: React.FC<RoomProps> = ({
         rowHeight={56}
         width={1308}
         margin={[0, 0]}
-        onLayoutChange={(newLayout) => setLayout(newLayout)}
+        onLayoutChange={handleLayoutChange}
         preventCollision={true}
         compactType={null}
         draggableHandle=".handle"
@@ -112,12 +136,17 @@ const Scheduler: React.FC<RoomProps> = ({
             className="bg-teal-300 bg-opacity-50 border-2 border-teal-500 dark:border-teal-100"
             key={i}
           >
-            <div className="text-sm">
-              <GripVertical className="handle" />
-              {`Item -${x}-${y}-${w}-${h} ${selectedId}`}
-              <button className="cancel" onClick={() => handleBookingEdit(i)}>
-                <Pencil />
-              </button>
+            <div className="text-sm p-2">
+              <div className="flex gap-2">
+                <GripVertical className="handle w-5 h-5" />
+                {`Item -${x}-${y}-${w}-${h} ${selectedId}`}
+                <button
+                  className="cancel w-5 h-5"
+                  onClick={() => handleBookingEdit(i)}
+                >
+                  <Pencil className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
         ))}
